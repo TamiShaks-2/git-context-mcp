@@ -1,6 +1,6 @@
 from .git_ops import get_repo_status_report
 from .git_activity import get_recent_activity_report
-from .work_summary import get_work_summary  # <-- החדש
+from .work_summary import get_work_summary
 from .code_map import get_code_map
 from .risk_scan import get_risk_scan_report
 from .code_search import search_code

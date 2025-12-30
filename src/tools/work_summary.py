@@ -13,7 +13,7 @@ def get_work_summary(repo_path: str, since: str = "7d") -> str:
     report = [f"=== WORK SUMMARY (Since: {since}) ===", f"Repo: {path.name}"]
 
     # --- 1. Changes Overview (What changed?) ---
-    # נבקש מגיט רק את השמות של הקבצים שהשתנו בתקופה הזו
+    # Ask git only for the names of files changed in this period
     changed_files_raw = run_git_cmd(path, ["log", f"--since={since}", "--name-only", "--format="])
     
     files = [f.strip() for f in changed_files_raw.splitlines() if f.strip()]
@@ -23,11 +23,11 @@ def get_work_summary(repo_path: str, since: str = "7d") -> str:
     report.append(f"  - Total files touched: {total_files_changed}")
     
     # --- 2. Active Modules (Heatmap by folder) ---
-    # נקבץ את הקבצים לפי התיקייה שבה הם נמצאים (מודול)
+    # Group files by the folder they are in (module)
     if files:
         modules = []
         for f in files:
-            # לוקחים את התיקייה הראשית (או התיקייה שהקובץ בתוכה)
+            # take the top-level folder (or the folder the file is in)
             p = Path(f)
             if len(p.parts) > 1:
                 modules.append(str(p.parent))
@@ -42,13 +42,13 @@ def get_work_summary(repo_path: str, since: str = "7d") -> str:
         report.append("  - No activity recorded in this period.")
 
     # --- 3. TODO / FIXME Scan ---
-    # שימוש ב-git grep כדי למצוא הערות בקוד במהירות
-    # -I = מתעלם מקבצים בינאריים
-    # -n = מציג מספרי שורות
+    # Use git grep to find comments in the code quickly
+    # -I = ignore binary files
+    # -n = show line numbers
     report.append(f"\nTechnical Debt Scan (TODOs / FIXMEs):")
     
     try:
-        # הפקודה הזו תחזיר את כל השורות עם TODO או FIXME
+        # This command will return all lines with TODO or FIXME
         grep_output = run_git_cmd(path, ["grep", "-I", "-n", "-E", "TODO|FIXME"])
         
         if grep_output:
@@ -56,13 +56,13 @@ def get_work_summary(repo_path: str, since: str = "7d") -> str:
             count = len(lines)
             report.append(f"  Found {count} items. Top critical items:")
             
-            # נציג רק את ה-10 הראשונים כדי לא להציף
+            # Show only the top 10 to avoid flooding
             for line in lines[:10]:
-                # הפורמט הוא usually: file:line:content
+                # Format is usually: file:line:content
                 parts = line.split(":", 2)
                 if len(parts) >= 3:
                     fname, linenum, content = parts[0], parts[1], parts[2].strip()
-                    # מקצרים תוכן ארוך מדי
+                    # Truncate overly long content
                     if len(content) > 60: content = content[:57] + "..."
                     report.append(f"    [Line {linenum}] {fname}: {content}")
             

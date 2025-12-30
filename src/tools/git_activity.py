@@ -10,7 +10,7 @@ def get_recent_activity_report(repo_path: str, n: int = 20) -> str:
         return f"ERROR: Path '{path}' does not exist."
 
     # 1. Recent Commits Log
-    # פורמט: Hash קצר | מחבר | זמן יחסי | הודעה
+    # Format: short-hash | author | relative-time | message
     log_fmt = "%h|%an|%ar|%s"
     commits_raw = run_git_cmd(path, ["log", f"-n {n}", f"--pretty=format:{log_fmt}"])
     
@@ -23,22 +23,22 @@ def get_recent_activity_report(repo_path: str, n: int = 20) -> str:
                 commits_report.append(f"  * {h} ({time}) {author}: {msg}")
     
     # 2. Identify "Hot" Files (Frequency analysis)
-    # אנחנו שואפים רק את שמות הקבצים מתוך ה-N קומיטים האחרונים
+    # We only extract the file names from the last N commits
     files_raw = run_git_cmd(path, ["log", f"-n {n}", "--name-only", "--format="])
     
     hot_files_report = []
     if files_raw:
-        # ניקוי שורות ריקות וספירה
+        # Clean empty lines and count
         files = [f.strip() for f in files_raw.splitlines() if f.strip()]
         if files:
             counter = Counter(files)
-            # לוקחים את ה-5 הנפוצים ביותר
+            # Take the top 5 most common files
             most_common = counter.most_common(5)
             hot_files_report.append(f"Top Modified Files (Last {n} commits):")
             for fname, count in most_common:
                 hot_files_report.append(f"  - {fname} ({count} changes)")
     
-    # בניית הדו"ח הסופי
+    # Build the final report
     report = [
         f"=== RECENT ACTIVITY REPORT (Last {n} commits) ===",
         f"Repo: {path.name}",
@@ -47,7 +47,7 @@ def get_recent_activity_report(repo_path: str, n: int = 20) -> str:
     
     if hot_files_report:
         report.extend(hot_files_report)
-        report.append("") # שורה רווח
+        report.append("") # blank line
         
     if commits_report:
         report.append("Recent Commits:")

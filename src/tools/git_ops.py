@@ -5,16 +5,16 @@ from typing import List
 
 def run_git_cmd(cwd: Path, args: List[str]) -> str:
     """Executes a git command safely and returns stdout."""
-    # הדפסה לטרמינל כדי שנראה מה קורה בזמן אמת
+    # Print to terminal so we can see what's happening in real time
     print(f"--- Running git command: {' '.join(args)} in {cwd}")
     
-    # הגדרות סביבה כדי למנוע תקיעות בווינדוס
+    # Environment settings to avoid hangs on Windows
     env = os.environ.copy()
-    env["GIT_PAGER"] = "cat"      # מונע פתיחת עורך טקסט
-    env["GIT_TERMINAL_PROMPT"] = "0" # מונע בקשת סיסמאות
+    env["GIT_PAGER"] = "cat"      # prevents opening an editor
+    env["GIT_TERMINAL_PROMPT"] = "0" # prevents password prompts
 
     try:
-        # הוספנו stdin=subprocess.DEVNULL כדי שלא יחכה לקלט
+        # added stdin=subprocess.DEVNULL so it won't wait for input
         result = subprocess.run(
             ["git"] + args,
             cwd=cwd,
@@ -56,14 +56,14 @@ def get_repo_status_report(repo_path: str) -> str:
                 fname = line[3:]
                 changes_summary.append(f"  [{code}] {fname}")
 
-    # 3. Sync Status (כאן בדרך כלל הבעיה)
+    # 3. Sync Status (this is usually where problems occur)
     print("Step 3: Checking Sync with Origin...")
     ahead, behind = 0, 0
-    # נבדוק קודם אם יש בכלל origin כדי לא סתם להריץ פקודה כבדה
-    remotes = run_git_cmd(path, ["remote"])
+    # Check if 'origin' exists first to avoid running a heavy command unnecessarily
+    remotes = run_git_cmd(path, ["remote"]) 
     
     if "origin" in remotes:
-        # הפקודה הזו לפעמים נתקעת אם אין רשת או הגיט לא מעודכן
+        # This command can sometimes hang if there's no network or git is outdated
         sync_raw = run_git_cmd(path, ["rev-list", "--left-right", "--count", "origin/main...HEAD"])
         if sync_raw:
             try:

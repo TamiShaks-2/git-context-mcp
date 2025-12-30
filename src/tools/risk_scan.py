@@ -3,9 +3,9 @@ from pathlib import Path
 from collections import Counter
 from .git_ops import run_git_cmd
 
-# סף רגישות (אפשר לשחק עם זה)
-LOC_THRESHOLD = 200        # קבצים מעל 200 שורות נחשבים "גדולים"
-CHURN_THRESHOLD = 5        # קבצים שהשתנו מעל 5 פעמים לאחרונה
+# Sensitivity thresholds (tweak as needed)
+LOC_THRESHOLD = 200        # files over 200 lines are considered "large"
+CHURN_THRESHOLD = 5        # files changed more than 5 times recently
 
 SKIP_DIRS = {'.git', '.venv', 'venv', 'node_modules', '__pycache__', 'dist', 'build', 'migrations'}
 SKIP_EXTS = {'.json', '.lock', '.svg', '.png', '.jpg', '.xml', '.map'}
@@ -32,7 +32,7 @@ def get_risk_scan_report(repo_path: str) -> str:
     file_stats = {} # {rel_path: loc}
     
     for root, dirs, files in os.walk(path):
-        # סינון תיקיות
+        # Filter directories
         dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
         
         for file in files:
@@ -44,7 +44,7 @@ def get_risk_scan_report(repo_path: str) -> str:
                 rel_path = str(file_path.relative_to(path)).replace('\\', '/')
                 file_stats[rel_path] = loc
 
-    # 2. איסוף נתוני שינויים (Churn) - 50 קומיטים אחרונים
+    # 2. Collect change data (Churn) - last 50 commits
     churn_counts = Counter()
     changes_raw = run_git_cmd(path, ["log", "-n 50", "--name-only", "--format="])
     
@@ -61,20 +61,20 @@ def get_risk_scan_report(repo_path: str) -> str:
     for fname, loc in file_stats.items():
         churn = churn_counts.get(fname, 0)
         
-        # קובץ גדול + שינויים תכופים = סיכון קריטי
+        # Large file + frequent changes = critical risk
         if loc > LOC_THRESHOLD and churn >= CHURN_THRESHOLD:
             high_risk_files.append((fname, loc, churn))
         
-        # סתם קובץ ענק
+        # Plain large file (not high churn)
         elif loc > LOC_THRESHOLD:
             large_files.append((fname, loc))
 
-    # מיון לפי רמת הסיכון (מספר השינויים * גודל)
+    # Sort by risk level (changes * size)
     high_risk_files.sort(key=lambda x: x[1] * x[2], reverse=True)
     large_files.sort(key=lambda x: x[1], reverse=True)
 
-    # 4. זיהוי חורי בדיקות (Missing Tests)
-    # נניח שעל כל תיקייה ב-src צריכה להיות מקבילה ב-tests
+    # 4. Identify test gaps (Missing Tests)
+    # Assume each folder under 'src' should have a matching folder under 'tests'
     src_dirs = set()
     test_dirs = set()
     

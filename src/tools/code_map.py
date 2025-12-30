@@ -2,13 +2,13 @@ import os
 from pathlib import Path
 from typing import List, Set
 
-# תיקיות שנתעלם מהן כדי לא לזהם את הקונטקסט
+# Directories to ignore to avoid polluting the context
 IGNORED_DIRS = {
     '.git', '.venv', 'venv', 'env', '__pycache__', 'node_modules', 
     '.idea', '.vscode', 'dist', 'build', 'coverage'
 }
 
-# תבניות לזיהוי קבצים חשובים
+# Patterns to identify important files
 ENTRY_POINTS = {
     'main.py', 'app.py', 'server.py', 'wsgi.py', 'manage.py', 'index.js', 
     'server.js', 'go.main', 'Program.cs'
@@ -23,13 +23,13 @@ def _generate_tree(dir_path: Path, prefix: str = "", limit: int = 15, current_co
     """Recursive function to build a visual tree string."""
     output = []
     
-    # מיון: תיקיות קודם, אחר כך קבצים
+    # Sorting: directories first, then files
     try:
         items = sorted(os.listdir(dir_path), key=lambda x: (not os.path.isdir(os.path.join(dir_path, x)), x.lower()))
     except PermissionError:
         return "", current_count
 
-    # סינון פריטים
+    # Filter items
     filtered_items = [i for i in items if i not in IGNORED_DIRS and not i.startswith('.')]
     
     for i, item in enumerate(filtered_items):
@@ -41,7 +41,7 @@ def _generate_tree(dir_path: Path, prefix: str = "", limit: int = 15, current_co
         connector = "└── " if is_last else "├── "
         full_path = dir_path / item
         
-        # סימון ויזואלי לקבצים חשובים
+        # Visual markers for important files
         marker = ""
         if item in ENTRY_POINTS: marker = " [🚀 ENTRY POINT]"
         elif item in CONFIG_FILES: marker = " [⚙️ CONFIG]"
@@ -51,7 +51,7 @@ def _generate_tree(dir_path: Path, prefix: str = "", limit: int = 15, current_co
         
         if full_path.is_dir():
             extension = "    " if is_last else "│   "
-            # רקורסיה לתוך תיקיות (עם מגבלת עומק משתמעת מה-limit הכללי)
+            # Recurse into directories (depth implicitly limited by the overall limit)
             sub_tree, new_count = _generate_tree(full_path, prefix + extension, limit, current_count)
             if sub_tree:
                 output.append(sub_tree)
@@ -68,7 +68,7 @@ def get_code_map(repo_path: str, top: int = 25) -> str:
     if not path.exists():
         return f"ERROR: Path '{path}' does not exist."
 
-    # 1. סריקה ראשונית למציאת קבצי מפתח בשורש
+    # 1. Initial scan to find key files in the root
     entry_points_found = []
     config_files_found = []
     
@@ -80,10 +80,10 @@ def get_code_map(repo_path: str, top: int = 25) -> str:
     except Exception as e:
         return f"Error scanning directory: {str(e)}"
 
-    # 2. בניית העץ
+    # 2. Build the tree
     tree_view, _ = _generate_tree(path, limit=top)
 
-    # 3. בניית הדו"ח
+    # 3. Build the report
     report = [
         f"=== PROJECT CODE MAP ===",
         f"Root: {path.name}",
@@ -91,7 +91,7 @@ def get_code_map(repo_path: str, top: int = 25) -> str:
         ""
     ]
 
-    # תקציר מהיר למעלה
+    # Quick summary at the top
     if entry_points_found:
         report.append(f"🚀 Detected Entry Points: {', '.join(entry_points_found)}")
     if config_files_found:

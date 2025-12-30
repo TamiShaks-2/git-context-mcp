@@ -9,22 +9,22 @@ def search_code(repo_path: str, query: str, file_pattern: str = "") -> str:
     if not path.exists():
         return f"ERROR: Path '{path}' does not exist."
 
-    # בניית הפקודה
-    # -I: מתעלם מקבצים בינאריים
-    # -n: מספרי שורות (חובה לתיקונים)
-    # --break --heading: עיצוב נוח לקריאה
-    # -C 2: מביא 2 שורות לפני ואחרי (Context)
+    # Build the command
+    # -I: ignore binary files
+    # -n: show line numbers (useful for fixes)
+    # --break --heading: format output for readability
+    # -C 2: include 2 lines of context before and after
     cmd = ["grep", "-I", "-n", "--break", "--heading", "-C", "2"]
     
-    # חיפוש חכם (Case Insensitive אם אין אותיות גדולות בשאילתה)
+    # Smart search (case-insensitive if the query has no uppercase letters)
     if query.islower():
         cmd.append("-i")
         
     cmd.append(query)
     
-    # סינון לפי סוג קובץ (אופציונלי)
+    # Filter by file type (optional)
     if file_pattern:
-        # בגיט גריפ, הסינון הוא בסוף הפקודה עם --
+        # In git grep, the file filter is placed after '--'
         cmd.append("--")
         cmd.append(file_pattern)
 
@@ -34,11 +34,11 @@ def search_code(repo_path: str, query: str, file_pattern: str = "") -> str:
         if not output:
             return f"No matches found for '{query}'."
             
-        # יצירת דו"ח קריא
+        # Create a readable report
         lines = output.splitlines()
-        match_count = output.count(":") # הערכה גסה
+        match_count = output.count(":") # rough estimate
         
-        # אם יש המון תוצאות, נקצר
+        # If there are many results, truncate the output
         if len(lines) > 300:
             preview = "\n".join(lines[:300])
             return f"Found many matches. Showing top results:\n\n{preview}\n\n... (Output truncated)"
