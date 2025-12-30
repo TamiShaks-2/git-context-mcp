@@ -1,1 +1,11 @@
 .venv_mcp/
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Packaging
+*.egg-info/
+dist/
+build/

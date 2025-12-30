@@ -1,9 +1,0 @@
-README.md
-pyproject.toml
-src/dev_context_mcp.egg-info/PKG-INFO
-src/dev_context_mcp.egg-info/SOURCES.txt
-src/dev_context_mcp.egg-info/dependency_links.txt
-src/dev_context_mcp.egg-info/requires.txt
-src/dev_context_mcp.egg-info/top_level.txt
-src/tools/__init__.py
-src/tools/git_ops.py

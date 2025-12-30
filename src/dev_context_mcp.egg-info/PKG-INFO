@@ -1,6 +1,0 @@
-Metadata-Version: 2.4
-Name: dev-context-mcp
-Version: 0.1.0
-Summary: Professional MCP Server for Dev Context
-Requires-Python: >=3.10
-Requires-Dist: mcp[cli]>=0.1.0
