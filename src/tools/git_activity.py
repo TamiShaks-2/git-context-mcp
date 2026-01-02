@@ -10,7 +10,6 @@ def get_recent_activity_report(repo_path: str, n: int = 20) -> str:
         return f"ERROR: Path '{path}' does not exist."
 
     # 1. Recent Commits Log
-    # Format: short-hash | author | relative-time | message
     log_fmt = "%h|%an|%ar|%s"
     commits_raw = run_git_cmd(path, ["log", f"-n {n}", f"--pretty=format:{log_fmt}"])
     
@@ -22,23 +21,19 @@ def get_recent_activity_report(repo_path: str, n: int = 20) -> str:
                 h, author, time, msg = parts[0], parts[1], parts[2], parts[3]
                 commits_report.append(f"  * {h} ({time}) {author}: {msg}")
     
-    # 2. Identify "Hot" Files (Frequency analysis)
-    # We only extract the file names from the last N commits
+    # 2. Identify "Hot" Files
     files_raw = run_git_cmd(path, ["log", f"-n {n}", "--name-only", "--format="])
     
     hot_files_report = []
     if files_raw:
-        # Clean empty lines and count
         files = [f.strip() for f in files_raw.splitlines() if f.strip()]
         if files:
             counter = Counter(files)
-            # Take the top 5 most common files
             most_common = counter.most_common(5)
             hot_files_report.append(f"Top Modified Files (Last {n} commits):")
             for fname, count in most_common:
                 hot_files_report.append(f"  - {fname} ({count} changes)")
     
-    # Build the final report
     report = [
         f"=== RECENT ACTIVITY REPORT (Last {n} commits) ===",
         f"Repo: {path.name}",
@@ -47,12 +42,10 @@ def get_recent_activity_report(repo_path: str, n: int = 20) -> str:
     
     if hot_files_report:
         report.extend(hot_files_report)
-        report.append("") # blank line
+        report.append("")
         
     if commits_report:
         report.append("Recent Commits:")
         report.extend(commits_report)
-    else:
-        report.append("No recent commits found.")
 
     return "\n".join(report)
