@@ -48,10 +48,10 @@ def get_risk_scan_report(repo_path: str) -> str:
     high_risk_files.sort(key=lambda x: x[1] * x[2], reverse=True)
 
     if high_risk_files:
-        report.append(f"\n🔥 CRITICAL HOTSPOTS (High Complexity + High Churn):")
+        report.append(f"\nCRITICAL HOTSPOTS (High Complexity + High Churn):")
         for fname, loc, churn in high_risk_files[:5]:
             report.append(f"   - {fname} (LOC: {loc}, Changes: {churn})")
     else:
-        report.append("\n✅ No critical hotspots detected.")
+        report.append("\n No critical hotspots detected.")
 
     return "\n".join(report)

@@ -35,8 +35,8 @@ def _generate_tree(dir_path: Path, prefix: str = "", limit: int = 15, current_co
         full_path = dir_path / item
         
         marker = ""
-        if item in ENTRY_POINTS: marker = " [🚀 ENTRY POINT]"
-        elif item in CONFIG_FILES: marker = " [⚙️ CONFIG]"
+        if item in ENTRY_POINTS: marker = " [ENTRY POINT]"
+        elif item in CONFIG_FILES: marker = " [CONFIG]"
         
         output.append(f"{prefix}{connector}{item}{marker}")
         current_count += 1
