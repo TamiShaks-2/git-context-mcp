@@ -18,10 +18,10 @@ def get_repo_status_report(repo_path: str) -> str:
     changes_summary = []
     if uncommitted:
         for line in status_raw.splitlines():
-            if len(line) > 3:
-                code = line[:2]
-                fname = line[3:]
-                changes_summary.append(f"  [{code}] {fname}")
+            code = line[:2]
+            # everything after the status, trimmed (handles variable spaces / edge cases better)
+            fname = line[2:].lstrip()
+            changes_summary.append(f"  [{code}] {fname}")
 
     # 3. Sync Status
     ahead, behind = 0, 0
