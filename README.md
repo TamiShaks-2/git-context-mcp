@@ -51,6 +51,10 @@ It exposes Git-based analysis tools that help AI coding agents quickly understan
 
 ---
 
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/tamishaks-2-git-context-mcp).
+
 ## Typical Usage Flow
 
 1. **project_status** – understand branch, cleanliness, and sync state  
